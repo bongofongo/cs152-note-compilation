@@ -1,0 +1,1290 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, graphicx, geometry, caption, subcaption, ragged2e, wrapfig, outlines, hyperref, xcolor, amssymb}
+\usepackage{framed}
+\usepackage{listings}
+\usepackage{amsthm}
+\graphicspath{ {/Users/oliverfong/Desktop/Pictures/} }
+\pagecolor{white}
+\colorlet{shadecolor}{orange!15}
+\parindent 0in
+\parskip 12pt
+\theoremstyle{definition}
+\newtheorem{note}{Note}
+\newtheorem{qstn}{Question}
+\newtheorem{ex}{Example}
+\newtheorem{defn}{Definition}
+\newtheorem{reg}{Rule}
+\newtheorem{exer}{Exercise}
+\newtheorem{term}{Term}
+\newtheorem{idea}{Idea}
+
+% The code section formatting.
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{cstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codepurple},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codegreen},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=C
+}
+
+\lstset{style=cstyle}
+
+\begin{document}
+\begin{center}
+{\LARGE \bf CMSC 15200}\\
+{\large Oliver Fong}\\
+Autumn 2022
+\end{center}
+\tableofcontents
+\section{Introduction}
+I'm a student in the class of 2025 in CMSC 15200. These are my notes that I took in Professor Wachs's course. I added a little fun and such to my notes, but hopefully that doesn't distract from the content present. I wrote all these in Vim using Latex. The main package I use is listings in Latex, and the most important plugin I use in Vim is Ulti-Snips which is mainly for boilerplate .tex file headings and to begin environments.  
+\subsection{Missing Content} 
+I missed a couple Friday classes here and there, so there might be some holes in these notes. I will try to fill them in before the final. The main days are Friday of week 3, Friday of week 6 and of week 8. I also totally spaced out during the Friday's class on week 8 which was on Stacks and Queues.  
+\newpage
+\subsection{For loop}
+\begin{lstlisting}
+unsigned long long int factorial (unsigned int n) {
+    unsigned long long res = 1;
+    unsigned int i = n;
+    while (i > 7) {
+        res *= i;
+        i--;
+    }
+    return res;
+}
+\end{lstlisting}
+OR a more readable version: 
+
+\begin{lstlisting}
+unsigned long long int factorial (unsigned int n) {
+    unsigned long long res = 1;
+    unsigned int i = n;
+    for (i = n; i > 1; i--) {
+        res *= i;
+    }
+    return res;
+}
+\end{lstlisting}
+\section{Week 3}
+\subsection{Switch}
+\begin{lstlisting}
+void print_days_in_month(unsigned char month, unsigned short year){ 
+    if (month == 9 || month == 3 || month == 6)    
+}
+\end{lstlisting}
+\note This format is a little tedious to type out: 9, 3, 6...
+\idea Try 'or-ing' the numbers together instead of the conditions...
+\begin{enumerate}
+    \item It's not that this way is a 'bad' way, but there is a better way. 
+    \item It's kind of like pattern matching in typed-racket. 
+    \item This is called 'switch'.
+\end{enumerate}
+
+\begin{lstlisting}
+void print_days_in_month(unsigned char month, unsigned short year){ 
+    switch (month) { 
+    case 9: 
+    case 4:
+    case 6:
+    case 11:
+        printf("30");
+        break;
+    case 2:
+        if (is_leap_year(year)) { 
+            printf("29");
+        } else {
+            printf("28");
+        }
+        break;
+    default:
+        printf("31");
+
+    }
+}
+\end{lstlisting}
+
+\note Notice there is no curly braces on the first tabbed-in area on printf("30").
+\begin{enumerate}
+    \item There are different cases the conditions can 'jump' to. 
+    \item They are targets for the computer
+    \item It's not bothered by seeing other cases that also apply to a certain return. 
+    \item This 'cleverness' allows us to lump together these cases for a certain return. But we do have to tell the computer to stop reading with the break;. 
+    \item When it hits the break statement, the computer jumps to the ending brace. and skips the rest of the switch.
+    \item If the variable doesn't match any of the cases, the computer will jump down to the default: and do whatever that entails. It's similar to an 'else' statement. 
+    \item There needs to be a break before the default case or else the computer will run that code anyways. 
+    \item Try to imagine the returns and instructions nested in the switch statement as flat as there is no curly braces around them. They are not really 'inside' a certain case or whatnot, but simply contained inside the switch statement and is placed after different cases. 
+\end{enumerate}
+\note The printf function really only takes strings, so the numbers in the string are a little easier to use instead of using some percent sign and plugging that into the string. 
+\note If there was a return statement somewhere in the switch, there would be no need for a break as the whole function (days\_in\_month) would immediately be returned. 
+
+\begin{enumerate}
+    \item If some number was entered in the parameter of 'month' that was outside the domain of months (e.g. 0 or 100), there would be some need for an error return. 
+    \item Let's re-analyze the default statement...
+\end{enumerate}
+
+\begin{lstlisting}
+default: 
+    if (month == 0 || month > 12) {
+        fprintf(stderr, "days_in_month: invalid month\n");
+        exit(1);
+    }
+    return 31;
+\end{lstlisting}
+
+\term fprintf stands for 'file print file'. stderr is the file error, and the string is the text you want to print. Really fancy could be including "\%u invalid month" or something. stderr is the file at which you want to print the error message. They create some sort of 'dummy' file that doesn't go to the disk but goes to the screen. stderr is a fake 'dummy' file that sends what you're printing to the screen instead of the file. When you print with stderr instead of stdout, it is labelled as an error message. There are some advantages to using the error instead of the stdout: it might be more likely to print on the screen before the program crashes. There is more urgency with stderr. The user is able to configure the error message as different things, such as making the message bright and terrifying red. Just in case someone wants to. 
+tldr: just use stderr when you want an error message. 
+\term exit(1); just ends the program. Since there is no valid month that is used, there's no point in running the program anymore... so just stop running it with exit(1); Just stop. 0 is the indication of success while 1 is the error return. 
+
+\subsection{Loops}
+\begin{enumerate}
+    \item We saw that factorial uses some type of induction, or recursion. This tends not to be done in typed-racket or functional programming language as much. 
+    \item The culture of C is not so much in line with lab 2's method of writing factorial...
+    \item With loops, it is more that when you finish it for the first time, you go back and do it again from the top. 
+\end{enumerate}
+
+\begin{lstlisting}
+unsigned long long int factorial(unsigned int n) {
+    unsigned long long int res = 1; 
+    while (n > 0) {
+        res = res * n;
+        n = n - 1;
+    }
+    return res;
+}
+\end{lstlisting}
+\note Iterations: 1) n = 4, res = 1 . 2) n = 3, res = 4. 3) n = 2 res = 12. 4) n = 1, res = 24. 5) n = 0. Return 24. 
+\subsection{More while loops}
+Time to critique some of this code...
+\begin{enumerate}
+    \item One thing he doesn't like is this (n > 0) condition. Kind of a waste because res = res * (n = 1) doesn't affect res at all. Change to (n > 1). 
+    \item Imagine the case when the initial condition isn't true (such as n !> 1). This notion of the 'base case' doesn't really exist in this as it's not recursive. In the case of n = 1 or 0, the function returns 1 which is right. 
+    \item 'just to reiterate' - 'there's probably a joke in there.'
+    \item Change 'res = res * n' to 'res *= n' 
+    \item Change 'n = n - 1' to 'n -= 1' to 'n$--$'. Note: 'n$--$' does not equal 'n - 1'
+    \item Change the two lines of 'res *= n; \\n n$--$;' to 'res *= n$--$;'
+\end{enumerate}
+\note You don't necessarily have to write code this condensed if you don't want to, but you have to be able to read code like this from other programmers. 
+\note '$--$n' (prefix) will first decrement n and then multiply res by n. Same as 'n = n - 1; \\n res *= n'.
+Improved function...
+\begin{lstlisting}
+unsigned long long int factorial(unsigned int n) {
+    unsigned long long int res = 1; 
+    while (n > 1) {
+        res *=  n--;
+    }
+    return res;
+}
+\end{lstlisting}
+
+\ex 'res *= n = n - 2' - totally fine syntax.
+
+On the topic of infinite loops:
+\begin{enumerate}
+    \item What to do if your computer gets stuck in an infinite loop that doesn't stop? It doesn't crash as it just keeps running.
+    \item "ctrl + c" in the terminal will immediately stop a running program. 
+\end{enumerate}
+\subsection{Do... While Loop}
+\idea Have a calculator that stops if the user presses Q. 
+\begin{lstlisting}
+char operator;
+while (operator != 'Q'){
+    /* Do the operation */;
+    operator = get.key();
+}
+\end{lstlisting}
+\qstn Well what are the problems with this program?
+\begin{enumerate}
+    \item What is operator when the loop starts?? Should not be using the operator uninitialized. 
+    \item There are solutions, but we're caught in an inelegant solution as the while loop asks for the condition at the beginning...
+\end{enumerate}
+Do this instead:
+
+\begin{lstlisting}
+char operator;
+do {
+    operator = get.key();
+    if (operator == '+') {
+        /* ... */
+    }
+} while (operator == 'Q');   
+\end{lstlisting}
+This allows the loop to run at least once before the while condition is checked. 
+\note At the beginning, the operator is uninitialized and is just some gibberish stored in memory. 
+
+% End of Week 3..
+% 
+\section{Week 4}
+\subsection{Ampersand gives the address of a variable in memory!}
+\begin{lstlisting}
+int a = 7, int b = 7, int c = 13;
+int *ap = &a, *bp = &b, *cp = &c;
+\end{lstlisting}
+\begin{enumerate}
+    \item Pointers essentially store the location of data of different values.
+    \item For example, if "int a" was stored at location 123, "ap" would be equal to 123. 
+\end{enumerate}
+\begin{lstlisting}
+printf("\%d \%d \%d\\n", a, b, c); /* 7 7 13 */
+printf("\%d \%d \%d\\n", ap, bp, cp); /* 123 456 789 */
+\end{lstlisting}
+\begin{enumerate}
+    \item a == b? Yes
+    \item b == c? No.
+    \item ap == bp? No. 
+        \begin{itemize}
+            \item "ap" stores 123, and "bp" stores 456. 
+        \end{itemize}
+    \item *ap == *bp? Yes.
+        \begin{itemize}
+            \item Essentially the same question as a == b? 
+            \item The asterisk informs the value stored, and not the storage location. 
+            \item Using the star value is called dereferencing the value. 
+        \end{itemize}
+        
+\end{enumerate}
+\begin{enumerate}
+    \item If you want "bp" to instead point to "c", you could either do:
+        \begin{itemize}
+            \item bp = \&c;
+            \item bp = cp;
+        \end{itemize}
+    \item You can change the value through dereferencing as well, such as: 
+    *ap = 1;  
+        
+\end{enumerate}
+\subsection{Use pointers to change variables in other functions!}
+\begin{lstlisting}
+void vector_add(double x1, double y1, double x2, double y2, double xres, double yres) {
+    xres = x1 + x2;
+    yres = y1 + y2;
+}
+\end{lstlisting}
+This function is not correct because of the way parameters work. It will not have the intended effect. 
+\\ 
+Example: 
+\begin{lstlisting}
+void foo() {
+    double x, y;
+    vector_add(12, 20, 1, 2, x, y);
+}
+\end{lstlisting}
+\note Each function has it's own independent variables and parameters. 
+\begin{enumerate}
+    \item There's space in memory for the function vector\_add, and space in memory for foo. They are not the same spaces in memory. 
+    \item The local variables for each respective functions are stored within that space allocated for the function.
+    \item Parameters are essentially local variables that are just initiated to the value that they're passed. 
+    \item These spaces are called \href{https://www.techopedia.com/definition/22304/stack-frame}{stack frames.}
+\end{enumerate}
+When you call vector\_add with the parameters x and y, the local variables inside the vector\_add stack frames for parameters "xres" and "yres" will store the variable location (the pointer essentially). 
+
+When the vector\_add function overwrites the local variable values for xres and yres, they will not change the local variables x and y in the foo stack. 
+\begin{lstlisting}
+void foo(){
+    double x, y;
+    vector_add(10, 20, 1, 2, &x, &y);
+\end{lstlisting}
+\note Now the local variable xres and yres in the vector stack will be pointers pointing towards x and y in the foo stack. 
+
+\begin{lstlisting}
+    *xres = x1 + x2;
+    *yres = y1 + y2;
+\end{lstlisting}   
+\note Used the ampersand to pass the address of "x" and "y", and used the asterisk to change the value of the variables in the foo stack.
+\note Topic of next class: lists! 
+\subsection{Lists and Arrays! (Finally)}
+
+\note Arrays are one of two ways to implement a list. Can't grow or shrink. The other method is less efficient in some ways and is more complicated. 
+
+\begin{enumerate}
+    \item If the array is storing 4 elements and each element is 8 bytes, then the array is logically 32 bytes. 
+    \item The "addresses" of the numbers in the array (in memory) would be sequential. For example, if the first element is stored at location 1000, then element two would be at 1008, and then 1016 for the third element and so forth. If you were looking for a later spot in the array, you might be able to track them through address location in memory. 
+    \item In other words, pointers will be how we work with arrays. How we keep track of where they are and how we will parse through them. 
+    \item To access a certain element of the array, you don't have to go through the whole array to get to a certain element. You can just skip over them straight to the later element. Whether the fourth or billionth element, there will be no efficiency difference, only memory. 
+    \begin{itemize}
+        \item We just can't grow it or shrink it. 
+    \end{itemize}
+
+    
+\end{enumerate}
+
+How do we keep track of an array?
+\begin{enumerate}
+    \item We will be using a pointer to the first element
+    \item The first element in the array is technically called the (zero-ith element). 
+    \item The exact reason for this is that if the zero-ith element is in address 1000, then the "first" element (the one right after) would be in $1000 + 8\cdot1$, and the "second" would be at $1000 + 8\cdot2$ etc. 
+
+\end{enumerate}
+
+\begin{lstlisting}
+double* a;
+\end{lstlisting}
+This is just a pointer to the first element. How do we know it's a pointer to a whole array than just the first double? How do we tell the difference? You can't. It's just context. There's no specific type for the pointer other than the first element's type.
+
+\note We don't really use ampersands for arrays because there's already built in infrastructure for that in arrays. 
+
+Pointers store the address. 
+
+Example: (Note: the parentheses are just for note-taking the address)
+\begin{lstlisting}
+[1.23 (1000), 4.56 (1008), 3.14 (1016), 0.68 (1024)]
+double* a = 1000;
+/* some syntax: 
+*a -> 1.23
+a -> 1000
+*(a + 1) -> 4.56 */
+\end{lstlisting}
+
+\begin{lstlisting}
+void foo() {
+    /* Stores 4 elements of type: double */
+    double my_array[4];
+    /* Sets the first element to 1.23 */
+    my_array[0] = 1.23;
+    printf("%lf", my_array[0]);
+} 
+\end{lstlisting}
+\note Valid indexes for this array would be : 0, 1, 2, 3. Not 4! If you try to access spots outside the array, the computer will try and read the memory which would be sequentially following the array (1032 or something) and will process whatever gibberish is there. Or, if you try and write something to that memory, it would override whatever is there. Try not to do this. 
+
+\begin{lstlisting}
+double my_arra[] = {1.23, 4.56, 3.14, 0.68}
+\end{lstlisting}
+After C creates the space in memory for the array when you create the array, it totally forgets what the array is. I guess. 
+
+\note There is no built in function to track the length of an array, it really doesn't know. You have to keep track of the length and the storage. 
+
+Mapping, folding, filtering, are all things we are going to cover. 
+
+Example:
+
+\begin{lstlisting}
+/* a is an array of unspecified length. */
+/* Should really pass in the length of the array.*/
+double sum(double a[], unsigned int alen) {
+    double res = 0;
+    /* Convention in C is to i,j,k for loop counters... */
+    unsigned int i;
+    /* i < alen - Important to be strict here because the length is one larger than the valid last index. */
+    for (i = 0; i < alen; i++) {
+        res += a[i];
+    }
+    return res;
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}
+void boo() {
+    /* When I create this array, C sets aside some memory for the values */
+    double my_a[] = {1,2,3,4};
+    double asum = sum(my_a, 4);
+}
+\end{lstlisting}
+\section{Week 5}
+\note Have to pass in a "out" parameter for the length of the array - because functions can only return one value. 
+
+\begin{lstlisting}
+int* evens(int* a, unsigned int alen, unsigned int* reslen) {
+    unsigned int n = 0, i, j = 0;
+    for (i = 0; i < alen; i++) {
+        if (a[i] % 2 == 0) {
+            n++;
+        }
+    }
+    int* res = (int*)malloc(n * sizeof(int));
+    if (res == null) {
+        fprintf(stderr, "...");
+    }
+\end{lstlisting}
+\note Need multiple values! one to work its way through a, and another to work its way through res. 
+\begin{lstlisting}
+    for (i = 0; i < alen; i++) {
+        if (a[i] % 2 == 0) {
+            res[j] = a[i];
+            j++;
+        }
+        *reslen = n;
+        return res;
+    }
+}
+\end{lstlisting}
+Improper to have some type of for loop for both the i and the j, it's good to only have j increment when the certain condition is satisfied... 
+\note Cooler way to do the same thing:
+\begin{lstlisting}
+res[j++] = a[i];
+\end{lstlisting}
+
+\begin{lstlisting}
+void foo() {
+    int nums[] = {1, 2, 3, 4};
+    unisgned int elen;
+    int* e = evens(nums, 4, &elen);
+    for (unsigned int i = 0; i < elen; i++) {
+        printf("%d", e[i]);
+    }
+    free(e);
+}    
+\end{lstlisting}
+
+Other topics:
+\subsection{Sentinels}
+Keeping track of lengths of lists. In C, you cannot ask it what the length of the list is. One solution to this is to have an extra parameter in your function as an "out" parameter. There is another way! You still have to do it, C doesn't do it for you. It's called a SENTINEL. (ooooh).
+
+It's a value in an array to denote the last number of the array. For example, in a list of student ID numbers, there is no negative value. You might be able to put in a negative value as the last value and when the computer found a negative it would know it has ended. You do have to use more memory to store the value. Another problem is that there is no one set value that sentinels are. For example, in an array of ints, which int are you never going to use? Who knows. Generally speaking, for all possible lists of integers, there are no safe values. It's a difficult question. There is a special type of array where you can use a sentinel and have a universal sentinel value)
+
+This is an array of characters. A string is just an array of characters right? There are 256 different values for characters, but it turns out they didn't need all 256 different symbols and letters for our entire system. 
+
+The flavour of working with strings is similar to working with arrays. String lengths are based on hitting the sentinel... 
+
+\subsection{Char and Arrays and Strings}
+We use single quotes to designate a single character - 
+\begin{lstlisting}
+"hello" //String - array
+'P' //Character
+"P" //String - array
+\end{lstlisting}
+
+The length of the string array "hello" is not actually 5, but 6 as the terminal character is there too. This "end" character is called the \emph{NULL terminator}. 
+
+\begin{lstlisting}
+"hello" -> {'h', 'e', 'l', 'l', 'o', '\0'}
+"hello" -> {'h', 'e', 'l', 'l', 'o', 0} \\Also works
+\end{lstlisting}
+
+If you're creating a string without using double quotes, if you're going some other way, you need to be careful to allocate enough memory to the proper size of the quote, and you need to be careful to put in the null terminator at the end. 
+
+Behind the scenes in storing a character, each character is actually some number from 0 - 255 where 0 is actually the null terminator. For example, 'h' might be 104 or something. 
+
+\begin{lstlisting}
+void foo() {
+    char* s1 = "hello";
+    /* Strings created this way are actually read-only */
+    char s2[] = {'h', 'i', 0};
+    char* s3 = (char*)malloc(6 * sizeof(char));
+    s2 = "bye"; // DOESN'T WORK
+    s3[0] = 'h';
+    s3[1] = 'i';
+    s3[2] = '\0';
+\end{lstlisting}
+When you use "=" with arrays, you're creating a pointer to the array and not a separate whole new array. It is fine sometimes, but there are implications.
+
+In some versions of C, you can declare array lengths with variables, but in others you can only include hard coded numbers. 
+
+\begin{lstlisting}
+unsigned int strlen(char* s) {
+    unsigned int i = 0;
+    while (s[i] != '\0') {
+        i++;
+    }
+    return i;
+}
+
+\end{lstlisting}
+
+Little Trick!
+\begin{lstlisting}
+while (s[i] != '\0') ~~ (s[i] != 0) ~~ (s[i])
+\end{lstlisting}
+
+Second verison of strlen() - travelling pointer
+\begin{lstlisting}
+unsigned int strlen(char* s) {
+    char* t = s;
+    while (*t != '\0') {
+        t++;
+    }
+    return t - s;
+}    
+\end{lstlisting}
+Little shorthand for this now:
+\begin{lstlisting}
+while (*t != '\0') { t++; } ~ while (*t++) {}
+/* But *t++ will iterate one too many times, so we have to compensate in the return statement such that it is : */
+return t - s - 1;
+
+\end{lstlisting}
+\subsection{Copying Strings, and String Functions}
+Copying strings: why can't I just say s2 = s1? It copies the pointer.
+\begin{lstlisting}
+void strcpy(char* dest, char* source) { //Bad idea!
+    unsigned int i;
+    for (i = 0; i < strlen(source); i++) {
+        dest[i] = source[i];
+    }     
+}
+\end{lstlisting}
+This would be an example of a bad idea. You will call strlen() over and over again which will iterate over the string over and over, which would ultimately take a long time. Next step would be to store the length as a variable so strlen() only runs once. But, this isn't typically the way we write this. 
+
+
+Maybe a better idea:
+\begin{lstlisting}
+void strcpy(char* dest, char* source) {
+    unsigned int i;
+    while (source[i] != '\0') {
+        dest[i] = source[i];
+        i++;
+    }     
+}
+\end{lstlisting}
+\textbf{Warning!} Is the terminating character 0 (the sentinel) copied into dest? No. We terminated the loop as source[i] hit 0 so it didn't copy into dest. 
+
+Again, we can use that little shorthand to make the loop less legible...
+\begin{lstlisting}
+void strcpy(char* dest, char* source) {
+    unsigned int i;
+    while (source[i]) {
+        dest[i] = source[i];
+        i++;
+    }     
+    dest[i] = '\0' //The final task for the loop, after the loop finished. 
+}
+\end{lstlisting}
+strlen() is a library function in C. 
+A similar library function... 
+\begin{lstlisting}
+char* strdup(char* src);
+\end{lstlisting}
+But Ooooooh, let's look at the travelling pointer version of strcpy(): 
+\begin{lstlisting}
+void strcpy(char* dest, char* source) {
+    while (*source) {
+        *dest = *source;
+        source++;
+        dest++;
+    }     
+    *dest = '\0'
+}
+\end{lstlisting}
+
+Some funky code you can write:
+\begin{lstlisting}
+i = n = n - 2; 
+\end{lstlisting}
+Initially would assign n = n - 2, and then assign i to the new n. Reads right to left in these assignment operations. Using this logic, we can shorten the code a little more. 
+\begin{lstlisting}
+void strcpy(char* dest, char* source) {
+    while (*dest = *source) {
+        source++;
+        dest++;
+    }     
+}
+\end{lstlisting}
+This version will also copy the terminating character into dest inside the loop.
+
+Again, you don't need to write in this manner, but you need to be able to understand when other people write code like this. 
+\begin{lstlisting}
+void strcpy(char* dest, char* source) {
+    while (*dest++ = *source++) {
+    } 
+}//Need the curly braces still to tell C that the loop is empty inside, and so it won't interpret the next line it sees as part of the loop 
+
+\end{lstlisting}
+How the computer reads this line: 
+Looks at everything at the right-hand side first in the assignment (*src++), it goes to course and it retrieves the value src is pointing to because of the star, because of the ++ it will say, I'll increment src later, then it will look at dest and write the value at the place dest is pointing to (because of the star) and then it looks at the ++ and says it
+will do that at the end, and then it will increment both dest and src and then it will look at t he while loop and it will check the condition and if it's the null terminating character it will stop. 
+
+Something else - try and feel the overall flow of this. An example of some function:
+\begin{lstlisting}
+char* emphasize(char* s) {
+    char* res = (char*)malloc((strlen(s) + 1) * sizeof(char)); //The + 1 is for the terminating character
+    unsigned int = 0;
+    while (s[i]) {
+        if (s[i] = '.') {
+            res[i] = '!';
+        } else {
+            res[i] = s[i];
+        }
+        i++;
+    }
+    res[i] = '\0';
+    return res;
+}
+\end{lstlisting}
+\section{Week 6}
+\note Recap: Last week we talked about sentinels and the null terminator in strings. We talked a lot about travelling pointer function, and tracking through arrays like that. Allocation of memory to arrays. strcopy(). strlen(). All built-in functions.
+
+Let's look at another string function today: strcmp() (string compare). This function compares all symbols and characters at least in the ASCI listings... 
+\note So all characters are differentiated. There's an overall scheme: numbers come before letters, they go in order, space comes before numbers, uppercase A comes before lowercase a, Z comes before a. 
+\begin{lstlisting}
+int strcmp(char* a, char* b) {
+    /* strcmp() returns: 
+       a < b -> negative
+       a == b -> 0
+       a > b -> positive */
+}
+\end{lstlisting}
+
+
+When you want to return more than one value, you can use out-parameters to alter variables out of function scope...
+\subsection{Structs}
+We've used structs and such in typed-racket, and you might've seen this as objects in python...
+The header file is kind of the glue that ties the evidence and hw.c files together, similarly, we put the structs in the header files and this will let C know where and how we're using them. 
+A point has an x value and a y value. 
+
+In racket, we often used structs as a way to return more than one value from a function by burying more variables inside a larger struct that contains multiple variables under a single overarching name. 
+\begin{lstlisting}
+struct point {
+    double x; // Can also write as double x, y;
+    double y; // These are called "fields" - The stuff clarified in the struct.
+};
+\end{lstlisting}
+These fields don't have to be the same type, and there can be as many or as little as you so desire. 
+
+\begin{lstlisting}
+void foo() {
+    struct point p = {1.0, 2.0};
+    p = {3.0, 4.0} // Wrong!
+    p.x = 3.1; // Correct!
+    printf("%lf\n", p.y);
+    struct point q;
+    q.x = 10;
+    q.y = 12;
+    double d = distance(p, q); // Imagine this is below the following functions in the program...
+    struct point r = midpoint(p, q);
+}
+\end{lstlisting}
+Let's write a distance function that returns the distance, and another that returns a point halfway between two others. 
+\begin{lstlisting}
+double distance(struct point p1, struct point p2) {
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y; // Wachs like the SYMMETRY of this code and how it LINES UP BABY! Do it like Wachs does it and make it pretty.
+    return sqrt(dx * dx + dy * dy);
+}
+
+struct point midpoint(struct point p1, struct point p2) {
+    struct point res = {(p1.x + p2.x) / 2, (p1.y + p2.y) / 2}; // You could also just say res.x = and res.y equals separately, but this is valid too. 
+    return res; // If you were thinking you could remove one line and just return the curly braces instead of having to put it in a variable, you were wrong. That's not valid C syntax! C doesn't know what the type of the curly braces even is, so you need to clarify that. 
+}
+\end{lstlisting}
+\subsection{Struct Memory Allocation}
+So why don't we have to manually allocate memory for this data type? With larger data types, we should allocate some memory to store the data (aka using malloc for arrays). It seems that with structs (e.g. midpoint that returns two variables) they return more information than something like a long or int or char with those amounts of bytes. Machinery for arrays and structs are different. 
+
+\note When you pass in a struct as a parameters, it makes a copy of that struct in local memory. They work similar to something like ints or floats or doubles when they are passed in as a parameter. There are no pointers here, when we're using structs. 
+
+It's weird because we were stressing using pointers and such with larger data types. Imagine structs with something like a dozen fields so copying that information into another place in memory might not be efficient. If you don't want to copy a whole big struct, then you can choose to use a pointer to the struct instead of copying it into local memory. For arrays, C forces you to use pointers and doesn't give you an option to copy it into local memory. 
+\subsection{Pointers with Structs}
+There's some extra syntax here we should be aware of. 
+
+Let's see with, say for example, midpoint() if we wanted to use pointers instead.
+\begin{lstlisting}
+struct point* midpt(struct point p1, struct point p2) {
+    struct point* res = (struct point*)malloc(sizeof(struct point)); // You might think that because struct point is two doubles, and doubles are something like 8 bytes, maybe you could do 2 * sizeof(double). That would be clever but stupid. Don't do that because it's not always right. Different hardware has different rules and it might not follow exactly the size of that. 
+    \\ Res is a pointer to a struct now, so we have to dereference it first. 
+    (*res).x = (p1.x + p2.x) / 2;
+    res -> y = (p1.y + p2.y) / 2; // Syntax that is almost universally used. 
+    return res;
+}
+\end{lstlisting}
+\subsection{Structs with Pointers: Syntax Fun}
+Let's talk a little more about structs! Something something about a cooking show and stuff being up on the board already. 
+
+\begin{lstlisting}
+// Some helper functions that might be useful. 
+struct point* point_new(double x, double y) {
+    struct point* res = (struct point*)malloc(sizeof(struct point));
+    // Does res == NULL?
+    res -> x = x;
+    res -> y = y;
+    return res;
+
+void point_free(struct point* p) {
+    free(p);
+}
+void point_show(struct point* p) {
+    printf("(%lf, %lf)\n", p->x, p->y);
+}
+
+// If you have a pointer to a struct.
+struct point* point_copy(struct point* p) {
+    return point_now(p->x, p->y);
+}
+
+\end{lstlisting}
+You can't ask C to find the fields of the struct and do something like loop over all the different fields of the struct. Can only access fields by specifying a field of the struct. 
+
+\begin{lstlisting}
+// Let's declare some structs:
+struct point {
+    double x, y;
+};
+
+// Declaring a field inside a struct as another struct.
+struct circle {
+    struct point center; // No star, no pointer.
+    double radius;
+};
+
+// Accessing the nested structs:
+void foo() {
+    struct circle c; // Right now just a struct. No pointer. 
+    c.radius = 10; // Should use the dot because there's no pointer.
+    c.center.x = 1;
+    c.center.y = 3;
+}
+
+void foo2() {
+    // Sometimes initializing structs this way will be too complex. 
+    struct circle c = {{1, 3}, 10};
+    // A little more overhead to create an excess struct for this circle initialization. 
+    struct point p = {1, 2};
+    c.center = p;
+}
+
+// Suppose there were pointers now...
+// How to use struct syntax with pointers. 
+void foo3() {
+    struct circle* c = (struct circle*)malloc(sizeof(struct circle));
+    c->radius = 10;
+    c->center.x = 1;
+    c->center.y = 2;
+}
+\end{lstlisting}
+
+Imagine for a slightly different declaration of the circle struct:
+\begin{lstlisting}
+struct circle {
+    struct point* center;
+    double radius;
+}
+
+void foo() {
+    struct circle* c = (struct circle*)malloc(sizeof(struct circle);
+    c->radius = 10;
+    c->center->x = 1; // TWO ARROWS YO
+    (*(*c).center).y = 2; // Same thing as the above line with different syntax
+}
+\end{lstlisting}
+
+The final permutation in the pointer-struct combo:
+\begin{lstlisting}
+struct circle {
+    // Two field struct:
+    struct point* center; // This means that it is storing the address of the point, and not the point itself.
+    double radius;
+}
+
+void foo() {
+    struct circle c;
+    c.radius = 10;
+    c.center->x = 1; // ONE ARROW
+    c.center->y = 2;
+}
+\end{lstlisting}
+
+Let's talk about related stuff!
+
+ARRAYS OF STRUCTS.
+Maybe we have a bunch of points and we want to make a graph of them. We'd do something like this:
+\begin{lstlisting}
+void foo() {
+    struct point points[] = {{1, 2}, {3, 4}, {5, 6}};
+    points[1].x = 10;
+    // Uses malloc to create memory for an array for 3 structs. 
+    struct point* points2 = (struct point*)malloc(3 * sizeof(struct point));
+    points2[0].y = 12;
+}
+\end{lstlisting}
+GOOD DAY!
+\section{Week 7}
+
+\subsection{typedef}
+typedef is a way to rename a data type for future use in the code. If it's in the header file, it's everywhere that the header file accesses. Sometimes for naming convention there might be an underscore \_s for structs or and underscore \_t for type, but this isn't really a universal preference.
+
+\begin{lstlisting}
+struct measurement {
+    ~~~~~~
+};
+
+typedef struct measurement measurement;
+
+//OR (to declare inline)
+
+typedef struct measurement {
+    ~~~~~~~
+} measurement;
+\end{lstlisting}
+The last word on this line of code is the new name, and the "struct measurement" is the old name. It's just a re-naming, or creating a synonym. 
+
+Let's say you don't like how c uses "int" for data declarations. You want to type something like integer. 
+\begin{lstlisting}
+typedef int integer;
+\end{lstlisting}
+
+\subsection{Matrix}
+    What's the difference between what we're doing with concatenating strings and matrixes? Matrixes are more a mathematical idea where every row has the same length, and it's very structured and such.
+
+\note Two different ways to make a matrix in C. They are not compatible with each other.
+\note 1st method (Really just a regular array with fancy syntax making it appear 2D):
+Let's say I want to make the matrix: {{1,2,3}, {4,5,6}, {7,8,9}}. 
+
+\begin{lstlisting}
+// 1D array:
+int l[] = {1,2,3,};
+// 2D array (matrix):
+int m[][] = {{1,2,3}, 
+             {4,5,6}, 
+             {7,8,9}};
+// On different lines for legibility, C doesn't really care. 
+int m2[3][5]; 
+// Would create a 3 row, 5 column matrix. 3x5.
+m2[0][2] = 7; //Initialize This 0 row 2nd column value. 
+
+// mtx parameter needs 3 columns, but can have n amount of rows. 
+void print_matrix(int mtx[][3], unsigned int nrows) {
+    unsigned int i, j;
+    for (i = 0; i < nrows; i++) {
+        for (j = 0; j < 3; j++) {
+            printf("%d ", mtx[i][j]);
+        }    
+    }
+}
+\end{lstlisting}
+The way matrixes are stored in memory is really just a single line array. \\
+1 2 3\\
+4 5 6\\
+7 8 9\\
+Is really just stored as: 1 2 3 4 5 6 7 8 9.
+When you want to access row 2, you want to skip row 1 and row 0. Computer will look at the number of columns and find that in the matrix there are 3 elements per row (3 columns) and will need to skip 6 elements ahead in total in the flat inversion to find the 2nd row. The "formula" for finding elements in code would be as such:
+
+$columns * row + c$
+
+This is essentially why you need to hardcode the amount of columns in memory.
+
+This whole thing can be imagined as just a single array for which syntax makes it look 2D. In reality, it's not structured differently than regular arrays.
+
+\note 2ND method: Array of arrays.
+
+\begin{lstlisting}
+int** m3 = (int**)malloc(3 * sizeof(int*)); // 3 -> rows
+unsigned int i;
+for (i = 0; i < 3; i++) {
+    m3[i] = (int*)malloc(5 * sizeof(int)); // 5 -> columns
+}
+m3[0][2] = 0;
+\end{lstlisting}
+Visualization of how the data looks where the black square is initialized to zero. The arrows are pointer visualization. \\
+$\square \rightarrow \square \square \blacksquare \square \square \\\square \rightarrow \square \square \square \square \square \\\square \rightarrow \square \square \square \square \square $
+
+NEW TOPIC!!!!
+\subsection{Trees}
+Hierarchical data structure. An example of a tree data structure is our computer's directory!
+
+In a kind of layout where there's parents, and there are children, and the children have children and so on so forth. 
+
+As a memory structure, there is a main pointer that stores the information on the parent node. The parent node itself will be represented as a struct, and will store pointer information (addresses) to the children of that node. 
+
+Let's design a struct for the structure of a binary tree: a tree where each node has at most two children.
+\begin{lstlisting}
+// For the storage of ints only.
+// No polymorphism (ability to store different types willy-nilly) for this.
+struct int_tree {
+    int val; // Value of that certain node. 
+    struct int_tree* left; // Want a pointer to another node of the same struct.
+};
+// There's a problem with the code above: using the struct definition inside the struct defintion: there's a circular dependency.
+
+// There's a get around that basically involves tricking the compiler
+typedef struct int_tree int_tree;
+
+struct int_tree {
+    int val; 
+    int_tree *left, *right; // Works
+};
+\end{lstlisting}
+\includegraphics[scale=0.65]{binary_tree}
+NULL is essentially the equivalent of none in Python. Null pointers are ones that don't point to anything. Note that Nodes H, I, J, F, G, and E all contain null pointers. 
+
+Let's write some functions with these "trees"
+\begin{lstlisting}
+int_tree* make_node(int val, int_tree* left, int_tree* right) {
+    int_tree* res = (int_tree*)malloc(sizeof(int_tree));
+    res -> val = val;
+    res -> left = left;
+    res -> right = right;
+    return res;
+}
+\end{lstlisting}
+
+int\_tree* t:
+\begin{center}
+\includegraphics[scale = 0.7]{tree}
+\end{center}
+\begin{lstlisting}
+void foo() {
+    int_tree* t = make_node(1, 
+                            make_node(2, NULL, NULL), 
+                            make_node(3, make_node(4, NULL, NULL), NULL));
+}
+\end{lstlisting}
+
+\note Trees are a naturally recursive data structure. 
+
+Let's look at some function that finds if a certain value is within the tree.
+\begin{lstlisting}
+int member(int_tree* t, int val) {
+    // 2 base cases:
+    // The node has a NULL child
+    if (t == NULL)
+        return 0;
+    // If the node has the value you're looking for
+    if (t - > val == val)
+        return 1;
+    return member(t -> left, val) || member(t -> right, val);
+
+}
+\end{lstlisting}
+
+QUICKLY TALK ABOUT ANOTHER TOPIC IN THE LAB:
+
+It turns out that a useful type of tree is one of which we put an artificial hierarchy on the data. Let's say we're storing name and phone number. How long will this take? We'd have no pattern or method of searching if the tree is unorganized. 
+
+\subsection{Binary Search Tree (BST)}
+Everything to the left of a node has to be less than it, and everything to the right of it has to be greater than it. Strictly. This is consistent with every single node. 
+
+(Trying this depiction of a tree out)
+\begin{lstlisting}
+// Example BST:
+        7
+    6 
+        5
+4
+        3
+    2
+        1
+\end{lstlisting}
+\subsection{Linked List}
+This whole idea of not being able to expand arrays to something larger than it is already declared and initialized to in memory is frustrating. We can't rely on there not being anything in the memory after the array. 
+
+\idea Let's create an array of a struct where each struct stores a value and a pointer towards another struct of the same type. This struct will essentially create a type of 'array' where each value is in some random place in memory but they're all linked through a pointer chain.
+
+This is called a: \emph{Linked List}. 
+
+The problem with these is that if you want to access the thousandth value in the list, you have to go through every single value before that to reach that 1000th index. But, they can grow and shrink. 
+\note No free lunch for python either where it seems that they have the best of both worlds. Because behind the scenes there are tradeoffs that they have to make.
+
+\begin{lstlisting}
+typedef struct intlist intlist;
+struct intlist {
+    int val;
+    intlist* next;
+}; 
+\end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.45]{linked_list}
+\end{center}
+everyone loves the cons() function from 15100 - RIGHT?
+\begin{lstlisting}
+// Some helper functions:
+intlist* cons(int val, intlist* rest) {
+    intlist* res = (intlist*)malloc(sizeof(intlist));
+    res->val = val;
+    res->rest = rest;
+    return res;
+}
+int is_empty(intlist* l) {
+    return l == NULL;
+}
+int first(intlist* l) {
+    if (is_empty(l)) {
+        fprintf(stderr, "first() error: given empty list");
+        exit(1);
+    } else {
+        return l->val;
+    }
+}
+}
+
+void foo() {
+    intlist* l = cons(7, cons(13, cons(25, cons(-2, NULL))));
+}
+\end{lstlisting}
+\note NULL is always the place in memory: 0, and some bytes past that. Computers will always reserve the first couple, ten, hundred bytes to be inaccessible for legit allocation. 
+
+Since NULL is always stored in the address 0, it is interpreted as false as a boolean. Everything else would be interpreted as true. 
+
+\begin{lstlisting}
+int sum(instlist* l) {
+    if (is_empty(l)) {
+        return 0;
+    }
+    return first(l) + sum(rest(l));
+}
+
+intlist* squares_copy(instlist* l) {
+    if (is_empty(l)) {
+        return NULL;
+    }
+    return cons(first(l) * first(l), squares_copy(rest(l)));
+}
+\end{lstlisting}
+\idea In real world scenarios where you're outputting a product to billions of people, there might be some debug version that has more overhead but is easier to debug, but there will also be a "deployment" version that would have less overhead but less debugging code too. 
+\section{Week 8}
+\subsection{More Linked Lists}
+Let's write a function that changes the list - not creates a new list - but changes the values in the indexes.
+
+\begin{lstlisting}
+void squares_change(intlist* l) {
+    if (is_empty(l)) [
+        return; 
+    }
+    l->val = l->val * l->val;
+    squares_change(rest(l));
+}
+\end{lstlisting}
+Let's now see a function that filters. We will return a new list back with only even numbers. 
+\begin{lstlisting}
+intlist* evens(intlist* l) {
+    if (is_empty(l)) {
+        return NULL;
+    }
+    if (first(l) % 2 == 0) {
+        // Cons does malloc for the return...
+        return cons(first(l), evens(rest(l)));
+    }
+    // For when I have an odd number
+    return evens(rest(l));
+}
+\end{lstlisting}
+Now, how should I free this linked list? Is there an order in which I should free them? I should kind of free these things backwards. If I free the first element first, then how would I know where the second element was? On the other hand, I could probably make a copy of the first element and free it, while the copy still has the location of the second element. Two ways.
+
+Let's try the method where we go backwards. We'll be using recursion here.
+\begin{lstlisting}
+void free_list(intlist* l) {
+    if (is_empty(l))
+        return;
+    free_list(rest(l));
+    // Here's how the recursion frees backwards: recursive call is BEFORE the action.
+    free(l);
+}
+\end{lstlisting}
+
+\begin{center}
+An visual depiction of the recursive free\_list();
+    \includegraphics[scale=0.45]{recursive}
+\end{center}
+
+
+Now let's try what an "experienced" C program might do with iteration instead of recursion to sum the list. 
+
+Cases: You're either going to end up at the end of a list, or start with an empty list. 
+\begin{lstlisting}
+int sum(intlist* l) {
+    int res = 0;
+    while (l != NULL) {
+        res += l->val;
+        l = l->next;
+    }
+    return res;
+}
+\end{lstlisting}
+It's important to remember that the parameter "l" is a copy of the pointer to the values in the heap, and not the pointer that is passed into the function. 
+
+Let's look at some more ways to iterate through linked lists.
+\begin{lstlisting}
+void squares_change(intlist* l) {
+    while (l != NULL) {
+        l->val = l->val * l*val;
+        l = l->next;
+    }
+}
+\end{lstlisting}
+
+Let's free the list now with iteration. We have to be careful not to use previously freed elements of the list. This method will essentially free forwards with the direction of the linked list, but it will save a temporary copy of the element as to keep the location of the next element intact.
+
+\begin{lstlisting}
+void free_list(intlist* l) {
+    intlist* n;
+    // Will almost certainly work, but is incorrect because it reaches into freed elements. 
+    while (l != NULL) {
+        free(l);
+        l = l->next;
+    }
+}
+\end{lstlisting}
+Instead, do this:
+\begin{lstlisting}
+void free_list(intlist* l) {
+    intlist* n;
+    while (l != NULL) {
+        n = l->next;
+        free(l);
+        l = n;
+    }
+}
+\end{lstlisting}
+\newpage
+\subsection{Wednesday Linked Lists and Such}
+\begin{center}
+    A visual depiction of the steps to be taken for evens()
+    \\where X = NULL pointer.
+    \includegraphics[scale=0.65]{evens_vis}
+\end{center}
+    
+\begin{lstlisting}
+intlist* evens(intlist* l) {
+    intlist *head = NULL; 
+    intlist *tail, *item; 
+    while (l != NULL) {
+        if (l->val % 2 == 0) {
+            item = cons(l->val, NULL);
+            if (head == NULL) {
+                head = item;
+            } else {
+                tail->next = item;
+            }
+            tail = item
+        }
+    }
+    l = l->next;
+    return head;
+}
+\end{lstlisting}
+
+\subsection{Inserting and Removing from Linked Lists}
+Removing from the front and end of the list is relatively simple. For the first element, it is easy because you start with it. That's where the pointer to the list is pointing. Removing from the end would essentially be looking for an element that has a null pointer. You have a travelling pointer looking at each of the elements until you find the null pointer and then you free it and make the element before have a null pointer. Removing in the middle consists of making copies of pointers and stitching and freeing stuff. 
+\note Even experienced programmers will really just write out diagrams to figure out what to do. So do it.
+\subsection{Stacks on Stacks on Stacks!}
+Push means to add something to the stack.
+
+Pop means to remove things from the stack.
+\subsection{Queueueueueues}
+All information has gone through my head.
+
+\subsection{HOW DO WE REPRESENT NUMBERS?}
+Storing data. Different bases in the number system. In computers, there are two main systems - base 2 and base 16.
+
+We use base 10 primarily because we have 10 fingers.
+\note HOW MANY FINGERS DO COMPUTERS HAVE? Technically none, but really they have 2. 
+
+Computers are assemblies of logic gates essentially. Essentially, there can be two settings that some wire could have: on or off. Essentially, ON would be if there was some voltage running through it, OFF would be an absence of voltage. We have to figure out how to represent everything through these two options. This is why we use BINARY.
+
+Let's convert 152 to binary.
+
+\begin{center}
+    152
+    \idea We're going to divide by 2 repeatedly and see what their remainder is. 
+        \begin{center}
+    \begin{tabular}{ | c | c | c | }
+        \hline
+        152 & 0 & 1\\
+        76 & 0 & 2\\
+        38 & 0 & 4\\
+        19 & 1 & 8\\
+        9 & 1 & 16\\
+        4 & 0 & 32\\
+        2 & 0 & 64\\
+        1 & 1 & 128\\
+        \hline
+        
+    \end{tabular}
+\end{center} 
+Essentially, works out to $8 + 16 + 128$
+\end{center}
+\section{Addendum}
+This is some brief code from some of the classes I missed. The stack-heap memory video notes are from the Simplilearn video on it, and the others are from Charlotte Gilmore. 
+\newpage
+\subsection{For loop}
+\begin{lstlisting}
+unsigned long long int factorial (unsigned int n) {
+    unsigned long long res = 1;
+    unsigned int i = n;
+    while (i > 7) {
+        res *= i;
+        i--;
+    }
+    return res;
+}
+\end{lstlisting}
+OR a more readable version: 
+
+\begin{lstlisting}
+unsigned long long int factorial (unsigned int n) {
+    unsigned long long res = 1;
+    unsigned int i = n;
+    for (i = n; i > 1; i--) {
+        res *= i;
+    }
+    return res;
+}
+\end{lstlisting}
+
+\subsection{Stack \& Heap}
+All from the Simplilearn video:
+In writing a program, first the computer will expand the header files for utilization in the C functions. Then the computer will compile the code. This is checking for errors, and then the transformation into Machine level code (010010101011 etc...). 
+
+Then the code editor looks at variables and loads it into memory. The memory area is the RAM (Random Access Memory). There are three different sections of RAM: Machine Code, stack, and the heap. The Machine code block stores the machine level code in the IDE and stuff (kinda unimportant right now). The stack block stores variables that are static in nature. The heap stores variables that are dynamic in nature. 
+
+Static memory allocation first stores all global-level variables, and then the function calls and local variables. The local variables are the variables written inside the function and are only used in the function. The memory allocation for the stack doesn't change while the program is running. 
+
+The stack frame is essentially the part of the stack that is storing the function memories. If main is running, there is an area in the stack memory storing the stack frame containing all variables in main. Then if main calls another function foo(), there will be another stack frame created in the stack storing all the local variables in foo(). After foo() has finished running, that stack frame will be removed from memory. After main() finishes, main()'s stack frame will also be removed. 
+
+In imagining the stack, stack frames are placed on top of each other as the function runs such that main() will usually be on the bottom. 
+
+The heap can grow or shrink in memory size such and is called dynamic. The functions: malloc(), calloc(), realloc(), and free() all access the heap memory. 
+    \begin{lstlisting}
+    int foo() {
+        int *z;
+        z = (int*)malloc(sizeof(int));
+        z = 100;
+    }
+    \end{lstlisting}
+This function will first create a variable $z$ containing a NULL pointer. Then the variable is initialized to a pointer pointing to the value 100 stored in the heap memory. 
+Some code like:
+\begin{lstlisting}
+int *p = (int*)malloc(1000000000000000 * sizeof(int));
+\end{lstlisting}
+This code will likely create a "heap overflow" error because the computer tried to allocate too much memory to the heap. 
+\subsection{Unions, Enums}
+\begin{lstlisting}
+// Idea to have a struct only storing one or the other.
+enum shape_tag {
+    CIRCLE,
+    RECTANGLE
+};
+struct shape {
+    struct circle c;
+    struct rectangle r;
+    enum shape_tag;
+};
+// Unions are better! Takes only one.
+union shape {
+    struct circle;
+    struct rectangle r;
+}
+struct tagged_shape {
+    union shape s;
+    enum shape_tag tag;
+};
+
+void bar() {
+    struct tagged_shape myc;
+    myc.shape.c.radius = 10;
+    myc.shape.c.center.x = 5;
+    myc.tag = CIRCLE; // Order for this doesn't matter.
+}
+double shape_even(shape_tag s.tag) {
+    // Switch works with enums:
+    switch(s.tag) {
+    case CIRCLE:
+        return 2;
+    }
+}
+\end{lstlisting}
+\end{document}
